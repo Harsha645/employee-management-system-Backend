@@ -2,6 +2,7 @@ package com.employeemanagementsystem.controller;
 
 import com.employeemanagementsystem.dto.request.EmployeeSaveRequestDTO;
 import com.employeemanagementsystem.dto.request.UpdateEmployeeRequestDTO;
+import com.employeemanagementsystem.dto.response.EmployeeResponseDTO;
 import com.employeemanagementsystem.entity.Employee;
 import com.employeemanagementsystem.service.EmployeeService;
 import com.employeemanagementsystem.util.StandardResponse;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
@@ -16,7 +18,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin
-@RequestMapping("api/v1/employee")
+@RequestMapping("/api/v1/employee")
 public class EmployeeController {
     @Autowired
     private EmployeeService employeeService;
@@ -47,7 +49,6 @@ public class EmployeeController {
     )
     public ResponseEntity<StandardResponse> deleteEmployeeById(@PathVariable(value = "id") int id) {
         boolean deletedEmployee = employeeService.deleteEmployeeById(id);
-
         return new ResponseEntity<StandardResponse>(
                 new StandardResponse(200, "Successfully Deleted", deletedEmployee), HttpStatus.OK
         );
@@ -62,6 +63,37 @@ public class EmployeeController {
         return new ResponseEntity<StandardResponse>(
                 new StandardResponse(200, "Successfully updated", updateMsg), HttpStatus.OK
         );
+    }
+    @GetMapping(
+            path = {"/get-by-id/{id}"}
+    )
+    public ResponseEntity<StandardResponse> getEmployeeById(@PathVariable(value = "id") int id){
+        EmployeeResponseDTO getEmployee = employeeService.getEmployeeById(id);
+        return new ResponseEntity<StandardResponse>(
+                new StandardResponse(200, "Get Employee "+ id, getEmployee),HttpStatus.OK
+        );
+    }
+    @GetMapping(
+            path = {"/get-by-email/{email}"}
+    )
+    public ResponseEntity<StandardResponse> getEmployeeByEmail(@PathVariable(value = "email") String email){
+        EmployeeResponseDTO getEmployee = employeeService.getEmployeeByEmail(email);
+
+        return new ResponseEntity<StandardResponse>(
+                new StandardResponse(200, "Get Employee "+ email, getEmployee),HttpStatus.OK
+        );
+    }
+
+    @GetMapping({"/for-admin"})
+    @PreAuthorize("hasAnyRole('Admin')")
+    public String forAdmin(){
+        return "This url is only accessible to admin";
+    }
+
+    @GetMapping({"/for-user"})
+    @PreAuthorize("hasAnyRole('User','Admin')")
+    public String forUser(){
+        return "This url is only accessible to user ";
     }
 
 }

@@ -2,6 +2,7 @@ package com.employeemanagementsystem.service;
 
 import com.employeemanagementsystem.dto.request.EmployeeSaveRequestDTO;
 import com.employeemanagementsystem.dto.request.UpdateEmployeeRequestDTO;
+import com.employeemanagementsystem.dto.response.EmployeeResponseDTO;
 import com.employeemanagementsystem.entity.Employee;
 
 import java.util.List;
@@ -17,4 +18,8 @@ public interface EmployeeService {
     boolean deleteEmployeeById(int id);
 
     String updateEmployeeByAdmin(int id, UpdateEmployeeRequestDTO updateEmployeeRequestDTO);
+
+    EmployeeResponseDTO getEmployeeById(int id);
+
+    EmployeeResponseDTO getEmployeeByEmail(String email);
 }

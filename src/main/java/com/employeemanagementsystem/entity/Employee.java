@@ -20,10 +20,10 @@ public class Employee {
     private String contact_number;
     private String password;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Emp_Role",
             joinColumns = @JoinColumn(name = "Empr_Id"),
             inverseJoinColumns = @JoinColumn(name = "Role_Id"))
-    Set<Role> role;
+    private Set<Role> role;
 }

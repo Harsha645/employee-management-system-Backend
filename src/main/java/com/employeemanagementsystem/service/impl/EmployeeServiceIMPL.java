@@ -2,18 +2,20 @@ package com.employeemanagementsystem.service.impl;
 
 import com.employeemanagementsystem.dto.request.EmployeeSaveRequestDTO;
 import com.employeemanagementsystem.dto.request.UpdateEmployeeRequestDTO;
+import com.employeemanagementsystem.dto.response.EmployeeResponseDTO;
 import com.employeemanagementsystem.entity.Employee;
 import com.employeemanagementsystem.entity.Role;
 import com.employeemanagementsystem.repisitory.EmployeeRepo;
 import com.employeemanagementsystem.repisitory.RoleRepo;
 import com.employeemanagementsystem.service.EmployeeService;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -24,6 +26,8 @@ public class EmployeeServiceIMPL implements EmployeeService {
     private RoleRepo roleRepo;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public Employee save(EmployeeSaveRequestDTO employeeSaveRequestDTO) {
@@ -40,7 +44,10 @@ public class EmployeeServiceIMPL implements EmployeeService {
 
     public void initRoleAndEmployee() {
         Role adminRole = new Role();
+
+
         Role employeeRole = new Role();
+
 
         if (!roleRepo.existsById("ADMIN")) {
             adminRole.setRoleName("ADMIN");
@@ -54,11 +61,11 @@ public class EmployeeServiceIMPL implements EmployeeService {
             roleRepo.save(employeeRole);
         }
         if (!employeeRepo.existsById(1)) {
-            com.employeemanagementsystem.entity.Employee employee = new com.employeemanagementsystem.entity.Employee();
+            Employee employee = new Employee();
             employee.setName("admin123");
             employee.setEmail("admin@gmail.com");
             employee.setContact_number("0719228889");
-            employee.setPassword("admin@123");
+            employee.setPassword(getEncodedPassword("admin@123"));
 
             Set<Role> adminRoles = new HashSet<>();
             adminRoles.add(adminRole);
@@ -67,11 +74,11 @@ public class EmployeeServiceIMPL implements EmployeeService {
             employeeRepo.save(employee);
         }
         if (!employeeRepo.existsById(2)) {
-            com.employeemanagementsystem.entity.Employee employee = new com.employeemanagementsystem.entity.Employee();
+            Employee employee = new Employee();
             employee.setName("employee123");
             employee.setEmail("employee@gmail.com");
             employee.setContact_number("0702228850");
-            employee.setPassword("employee@123");
+            employee.setPassword(getEncodedPassword("employee@123"));
 
             Set<Role> employeeRoles = new HashSet<>();
             employeeRoles.add(employeeRole);
@@ -84,16 +91,13 @@ public class EmployeeServiceIMPL implements EmployeeService {
     @Override
     public List<Employee> getAllEmployee() {
         List<Employee> employees = employeeRepo.findAll();
-//        List<Employee> employeeResponseDTOList = modelMapper.map(employees,  new TypeToken(){
-//                }.getType()
-//        );
         return employees;
     }
 
     @Override
     public boolean deleteEmployeeById(int id) {
-       employeeRepo.deleteById(id);
-       return true;
+        employeeRepo.deleteById(id);
+        return true;
     }
 
     @Override
@@ -105,5 +109,24 @@ public class EmployeeServiceIMPL implements EmployeeService {
 
         employeeRepo.save(employee);
         return "Updated";
+    }
+
+    @Override
+    public EmployeeResponseDTO getEmployeeById(int id) {
+        Optional<Employee> employee = employeeRepo.findById(id);
+        EmployeeResponseDTO employeeResponseDTO = modelMapper.map(employee.get(),EmployeeResponseDTO.class);
+        return employeeResponseDTO;
+    }
+
+    @Override
+    public EmployeeResponseDTO getEmployeeByEmail(String email) {
+        Optional<Employee> employee = employeeRepo.findByEmail(email);
+        EmployeeResponseDTO employeeResponseDTO = modelMapper.map(employee.get(),EmployeeResponseDTO.class);
+        return employeeResponseDTO;
+    }
+
+    public String getEncodedPassword(String password){
+
+        return passwordEncoder.encode(password);
     }
 }
